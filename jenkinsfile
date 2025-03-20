@@ -1,41 +1,35 @@
 pipeline {
     agent any
-
     environment {
-        SONARQUBE_URL = "http://13.53.123.95:9000/"
+        SONARQUBE_URL = "http://16.16.251.42:9000/"
     }
-
-
     stages {
         stage('Checkout Code') {
             steps {
                 script {
-                    git branch: "develop", 
-                        url: 'https://github.com/SASowah/numbers-guess-gameApp.git'
+                    git branch: "dev",
+                        url: 'https://github.com/Abimbola-star/NumberGuessGamePractice.git'
                 }
             }
         }
-        
         stage('Build') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                sh 'mvn clean package'
             }
         }
-
         stage('Test') {
             steps {
                 sh 'mvn test'
             }
         }
-
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    withSonarQubeEnv('sonarqube-token') { 
+                    withSonarQubeEnv('sonarqube-token') {
                         sh '''
-                        mvn sonar:sonar \
-                        -Dsonar.projectKey=NumbersGuessGame \
-                        -Dsonar.projectName="NumbersGuessGame" \
+                        mvn clean verify sonar:sonar \
+                        -Dsonar.projectKey=Practice-Porject \
+                        -Dsonar.projectName='Practice-Porject' \
                         -Dsonar.host.url=${SONARQUBE_URL} \
                         -Dsonar.login=${SONAR_AUTH_TOKEN}
                         '''
@@ -43,32 +37,24 @@ pipeline {
                 }
             }
         }
-
         stage('Deploy to Tomcat') {
             steps {
                 script {
-                    deploy adapters: [tomcat7(
-                        credentialsId: 'tomcat-credentials', 
-                        path: '', 
-                        url: 'http://13.51.165.114:8080/'
-                    )], 
-                    contextPath: 'numbers-game', war: 'target/*.war'
+                    deploy adapters: [tomcat7(credentialsId: 'tomcat-credentials', path: '', url: 'http://13.60.6.51:8080/manager/html/')], contextPath: null, war: '**/*.war'
                 }
             }
         }
     }
-
     post {
-        success {
-    echo '✅ Build, Testing, SonarQube Analysis, and Deployment Successful!'
-    emailext(
-        subject: "Build Success: ${env.JOB_NAME}",
-        body: "Build #${env.BUILD_NUMBER} was successful.\nCheck the details at: ${env.BUILD_URL}",
-        to: "georgesomina91@gmail.com, janecollins171993@gmail.com, kehinde_jimoh@yahoo.co.uk"
-        }
+          success {
+        echo '✅ Build, Testing, SonarQube Analysis, and Deployment Successful!'
+        emailext subject: "Jenkins Build Success: ${env.JOB_NAME}",
+                 body: "Good news! The Jenkins build ${env.BUILD_NUMBER} was successful.",
+                 recipientProviders: [[$class: 'DevelopersRecipientProvider']],
+                 to: 'samniisowah@yahoo.com'
         failure {
-            echo '❌ Build Failed! Check logs for issues.'
+            echo ':x: Build Failed! Check logs for issues.'
         }
     }
 }
-
+}
