@@ -51,7 +51,7 @@ pipeline {
         emailext subject: "Jenkins Build Success: ${env.JOB_NAME}",
                  body: "Good news! The Jenkins build ${env.BUILD_NUMBER} was successful.",
                  recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-                 to: 'samniisowah@yahoo.com'
+                 to: 'samniisowah866@gmail.com'
         failure {
             echo ':x: Build Failed! Check logs for issues.'
         }
